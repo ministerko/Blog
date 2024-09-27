@@ -1,6 +1,6 @@
 # main.py
 
-from fastapi import FastAPI, HTTPException, Depends, Security
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.orm import Session
 from typing import List
@@ -54,17 +54,13 @@ def create_blog_post(blog_post: schemas.BlogPostCreate, db: Session = Depends(ge
     return db_blog_post
 
 @app.get("/blog-posts/", response_model=List[schemas.BlogPost])
-def read_blog_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)):
-    if not verify_password(credentials):
-        raise HTTPException(status_code=403, detail="Invalid credentials")
+def read_blog_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     
     blog_posts = db.query(models.BlogPost).offset(skip).limit(limit).all()
     return blog_posts
 
 @app.get("/blog-posts/{post_id}", response_model=schemas.BlogPost)
-def read_blog_post(post_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security)):
-    if not verify_password(credentials):
-        raise HTTPException(status_code=403, detail="Invalid credentials")
+def read_blog_post(post_id: int, db: Session = Depends(get_db)):
     
     db_blog_post = db.query(models.BlogPost).filter(models.BlogPost.id == post_id).first()
     if db_blog_post is None:
